@@ -1,7 +1,6 @@
 /* 
 Notes for what to do next:
 -Figure out how to implement player names into it.
--in event controller (and maybe gameController.play) handle invalid moves. probably just ignore them.
 -Maybe add mousedown to change color, and mouseup to add the marker
 -What happens to event controllers at game end? Perhaps disable all marker event controllers?
 */
@@ -75,7 +74,9 @@ const displayController = (function() {
 
     const initialize = function() {
         const gameBoard = document.getElementById('game-board');
+        let players = []; // Array of player objects;
         const squares = [];
+        const playerArea = document.getElementById('player-area');
 
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
@@ -87,18 +88,39 @@ const displayController = (function() {
             }
         }
         squares.forEach(square => {
-            square.addEventListener('mousedown', () => {
+            square.addEventListener('click', () => {
                 const row = parseInt(square.getAttribute('data-row'));
                 const col = parseInt(square.getAttribute('data-col'));
                 const marker = gameController.play(row, col);
-                console.log(marker);
-                square.classList.add(marker);
+                if (marker != null) {square.classList.add(marker)};
                 if (gameController.checkWin()) {console.log('You win!')};
                 if (gameController.checkDraw()) {endDraw()};
             });
             gameBoard.appendChild(square);
 
         });
+
+        for (let i = 0; i <2; i++) {
+            let playerLabel = document.createElement('label');
+            let playerNameInput = document.createElement('input');
+            let marker = (players[0] == null ? 'X' : 'O');
+            let playerNumber = (players[0] == null ? 1 : 2);
+            playerLabel.innerText = marker + ': Player ' + playerNumber;
+            playerLabel.setAttribute('name','player' + playerNumber);
+            playerArea.appendChild(playerLabel);
+            playerArea.appendChild(playerNameInput);
+            players.push(playerNameInput);
+        }
+        let button = document.createElement('button');
+        button.innerText = 'Play';
+        button.addEventListener('click', e => {
+            e.preventDefault()
+            players.forEach(player => {
+                let name = player.value()
+                
+            })
+        });
+        playerArea.appendChild(button);
     }
     return{
         initialize,
