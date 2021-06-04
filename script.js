@@ -104,18 +104,7 @@ const displayController = (function() {
         playerTwoInput.setAttribute('type', 'text');
         displayElements.push(playerTwoInput);
 
-        
-
-        for (let i = 0; i <2; i++) {
-            let playerLabel = document.createElement('label');
-            let playerNameInput = document.createElement('input');
-            let playerNumber = (players[0] == null ? 1 : 2);
-            playerLabel.innerText = marker + ': Player ' + playerNumber;
-            playerLabel.setAttribute('name','player' + playerNumber);
-            playerArea.appendChild(playerLabel);
-            playerArea.appendChild(playerNameInput);
-            players.push(playerNameInput);
-        }
+        displayElements.forEach(element => playerArea.appendChild(element));
 
         let button = document.createElement('button');
         button.innerText = 'Play';
@@ -164,8 +153,9 @@ const displayController = (function() {
     }
     return{
         initialize,
+        createPlayerInput,
+        createGameboard,
     }
 })();
 
-displayController.initialize();
-document.querySelector
+displayController.createPlayerInput()

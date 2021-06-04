@@ -6,11 +6,18 @@
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
 }
+#player-area {
+    width: 300px;
+    height: 500px;
+    display: grid;
+    margin: 50px auto;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 3fr 1fr 1fr 1fr;
+}
 .square {
     background-color: pink;
     position: relative;
     padding: 4px;
-
 }
 [data-row='1'] {
     border-top: black solid 4px;
@@ -23,6 +30,7 @@
     padding: 4px 0px;
 }
 .x {
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -39,13 +47,15 @@
 .x::after {
     content: '';
     background-color: black;
-    height: 20px;
+    height: 15%;
     width: 100%;
     border-radius: 5px;
     transform: rotate(-45deg); 
     position: absolute;
 }
+
 .o {
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
