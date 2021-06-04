@@ -12,6 +12,9 @@ let gameController = (function() {
     let turn = true; // If true, it is player 1's turn,  
     
     const changeTurn = () => turn = !turn;
+
+    const currentPlayer = () => (turn ? 'player1' : 'player2');
+    
     const currentMarker = () => {
         return (turn ? 'x' : 'o');
     }
@@ -72,38 +75,40 @@ const Player = (name) => {
 
 const displayController = (function() {
 
-    const initialize = function() {
-        const gameBoard = document.getElementById('game-board');
-        let players = []; // Array of player objects;
-        const squares = [];
+    const createPlayerInput = () => {
+        let displayElements = [];
+
         const playerArea = document.getElementById('player-area');
 
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < 3; j++) {
-                let square = document.createElement('div')
-                square.setAttribute('data-row', i);
-                square.setAttribute('data-col', j);
-                square.classList.add('square');
-                squares.push(square);
-            }
-        }
-        squares.forEach(square => {
-            square.addEventListener('click', () => {
-                const row = parseInt(square.getAttribute('data-row'));
-                const col = parseInt(square.getAttribute('data-col'));
-                const marker = gameController.play(row, col);
-                if (marker != null) {square.classList.add(marker)};
-                if (gameController.checkWin()) {console.log('You win!')};
-                if (gameController.checkDraw()) {endDraw()};
-            });
-            gameBoard.appendChild(square);
+        const xDiv = document.createElement('div');
+        xDiv.classList.add('x');
+        displayElements.push(xDiv);
+        
+        const oDiv = document.createElement('div');
+        oDiv.classList.add('o');
+        displayElements.push(oDiv);        
+        
+        const playerOneLabel = document.createElement('p');
+        playerOneLabel.innerText = 'Player 1:';
+        displayElements.push(playerOneLabel);
 
-        });
+        const playerTwoLabel = document.createElement('p');
+        playerTwoLabel.innerText = 'Player 2:';
+        displayElements.push(playerTwoLabel);
+
+        const playerOneInput = document.createElement('input')
+        playerOneInput.setAttribute('type', 'text');
+        displayElements.push(playerOneInput);
+
+        const playerTwoInput = document.createElement('input')
+        playerTwoInput.setAttribute('type', 'text');
+        displayElements.push(playerTwoInput);
+
+        
 
         for (let i = 0; i <2; i++) {
             let playerLabel = document.createElement('label');
             let playerNameInput = document.createElement('input');
-            let marker = (players[0] == null ? 'X' : 'O');
             let playerNumber = (players[0] == null ? 1 : 2);
             playerLabel.innerText = marker + ': Player ' + playerNumber;
             playerLabel.setAttribute('name','player' + playerNumber);
@@ -111,6 +116,7 @@ const displayController = (function() {
             playerArea.appendChild(playerNameInput);
             players.push(playerNameInput);
         }
+
         let button = document.createElement('button');
         button.innerText = 'Play';
         button.addEventListener('click', e => {
@@ -122,10 +128,44 @@ const displayController = (function() {
         });
         playerArea.appendChild(button);
     }
+    const createGameboard = () => {
+        // Creates Gameboard and event listeners for each square
+        const gameBoard = document.getElementById('game-board');
+        const squares = [];
+        
+        // Creates and labels game squares
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                let square = document.createElement('div')
+                square.setAttribute('data-row', i);
+                square.setAttribute('data-col', j);
+                square.classList.add('square');
+                squares.push(square);
+            }
+        }
+        // Add event listeners to each game square
+        squares.forEach(square => {
+            square.addEventListener('click', () => {
+                const row = parseInt(square.getAttribute('data-row'));
+                const col = parseInt(square.getAttribute('data-col'));
+                const marker = gameController.play(row, col);
+                if (marker != null) {square.classList.add(marker)};
+                if (gameController.checkWin()) {console.log('You win!')};
+                if (gameController.checkDraw()) {endDraw()};
+            });
+            gameBoard.appendChild(square);
+    
+        });
+        
+    }
+
+    const initialize = function() {
+        
+    }
     return{
         initialize,
     }
 })();
 
 displayController.initialize();
-
+document.querySelector
