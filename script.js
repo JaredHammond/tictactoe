@@ -9,11 +9,25 @@ Notes for what to do next:
 let gameController = (function() {
     'use strict';
     let board = [[],[],[]]; //[row][column]
-    let turn = true; // If true, it is player 1's turn,  
+    let turn = true; // If true, it is player 1's turn,
+    let playerOne;  
+    let playerTwo
     
+    const startGame = () => {
+        playerOne = new Player(document.getElementById('p1').value);
+        playerTwo = new Player(document.getElementById('p2').value);
+        playerOne.setOpponent(playerTwo.name);
+        playerTwo.setOpponent(playerOne.name);
+
+
+        displayController.removeCurrentContent();
+        displayController.createGameboard();
+        displayController.changeMessage('It\'s ' + playerOne.name + '\'s turn.');
+    }
+
     const changeTurn = () => turn = !turn;
 
-    const currentPlayer = () => (turn ? 'player1' : 'player2');
+    const currentPlayer = () => {return turn ? playerOne : playerTwo};
     
     const currentMarker = () => {
         return (turn ? 'x' : 'o');
@@ -24,6 +38,7 @@ let gameController = (function() {
     }
 
     const checkWin = function() {
+        console.log(board);
         // Returns true if the last play resulted in a win for that player
         for (let i = 0; i < 3; i++) {
             // Check rows
@@ -57,8 +72,16 @@ let gameController = (function() {
         if (isPlayAllowed(row,col)) {
             let marker = currentMarker();
             board[row][col] = marker;
-            changeTurn();
-            return marker;
+            let current = currentPlayer();
+            if (checkWin()) {
+                displayController.winCondition(current.name);
+            } else if (checkDraw()) {
+                displayController.drawCondition();
+            } else {
+                displayController.changeMessage(current.name + " played. It\'s now " + current.opponent + "\'s turn.")
+                changeTurn();
+                return marker;
+            }
         }
     }
     return {
@@ -66,19 +89,26 @@ let gameController = (function() {
         play,
         checkDraw,
         checkWin,
+        startGame,
     }
   })();
 
-const Player = (name) => {
-    return {name};
+function Player(name) {
+    this.name = name;
+    this.opponent = '';
+    this.setOpponent = (oppName) => {this.opponent = oppName};
 }
 
 const displayController = (function() {
+    const content = document.getElementById('content');
+    const messages = document.createElement('h3');
+
 
     const createPlayerInput = () => {
         let displayElements = [];
 
-        const playerArea = document.getElementById('player-area');
+        const playerArea = document.createElement('div');
+        playerArea.setAttribute('id', 'player-area');
 
         const xDiv = document.createElement('div');
         xDiv.classList.add('x');
@@ -98,10 +128,12 @@ const displayController = (function() {
 
         const playerOneInput = document.createElement('input')
         playerOneInput.setAttribute('type', 'text');
+        playerOneInput.setAttribute('id','p1');
         displayElements.push(playerOneInput);
 
         const playerTwoInput = document.createElement('input')
         playerTwoInput.setAttribute('type', 'text');
+        playerTwoInput.setAttribute('id','p2');
         displayElements.push(playerTwoInput);
 
         displayElements.forEach(element => playerArea.appendChild(element));
@@ -110,22 +142,30 @@ const displayController = (function() {
         button.innerText = 'Play';
         button.addEventListener('click', e => {
             e.preventDefault()
-            players.forEach(player => {
-                let name = player.value()
-                
-            })
+            gameController.startGame();
         });
+
         playerArea.appendChild(button);
+        content.appendChild(playerArea);
     }
+
+    const removeCurrentContent = () => {
+        while (content.firstChild) {
+            content.removeChild(content.lastChild);
+        }
+    }
+
+
     const createGameboard = () => {
         // Creates Gameboard and event listeners for each square
-        const gameBoard = document.getElementById('game-board');
+        const gameBoard = document.createElement('div');
+        gameBoard.setAttribute('id','game-board');
         const squares = [];
         
         // Creates and labels game squares
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
-                let square = document.createElement('div')
+                let square = document.createElement('div');
                 square.setAttribute('data-row', i);
                 square.setAttribute('data-col', j);
                 square.classList.add('square');
@@ -139,23 +179,41 @@ const displayController = (function() {
                 const col = parseInt(square.getAttribute('data-col'));
                 const marker = gameController.play(row, col);
                 if (marker != null) {square.classList.add(marker)};
-                if (gameController.checkWin()) {console.log('You win!')};
-                if (gameController.checkDraw()) {endDraw()};
             });
             gameBoard.appendChild(square);
     
         });
-        
+
+        content.appendChild(gameBoard);  
+        content.appendChild(messages);
     }
 
-    const initialize = function() {
-        
+    const changeMessage = (words) => {
+        messages.innerText = words;
     }
+
+    const winCondition = (winner) => {
+        removeCurrentContent();
+        changeMessage(winner + ' won the game!')
+        messages.classList.add('gameover');
+        content.appendChild(messages);
+    }
+
+    const drawCondition = () => {
+        removeCurrentContent();
+        changeMessage('The game ended in a draw!')
+        messages.classList.add('gameover');
+        content.appendChild(messages);
+    }
+
     return{
-        initialize,
         createPlayerInput,
         createGameboard,
+        removeCurrentContent,
+        changeMessage,
+        winCondition,
+        drawCondition,
     }
 })();
 
-displayController.createPlayerInput()
+displayController.createPlayerInput();
