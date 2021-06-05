@@ -1,26 +1,3 @@
-Tic Tac Toe game as project for TheOdinProject
+Tic Tac Toe game for portfolio
 
-Things to do:
-1. Index.html
-    -create skeleton -done
-    -Create initial page elements -done
-
-2. script.js
-    -Game State Controller 
-        -Turn -done
-        -Win condition -in progress
-        -Available plays -done
-        -Tie condition -in progress
-    -Display Controller
-        -Show player names
-        -show turn
-        -show board state -done
-        -show board -done
-    -Player object
-        -play function -controlled by game and display controllers
-        -store name
-
-3. style.CSS
-    -Board -done
-    -player area
-    -win or draw handling
+The purpose of this project was to learn to use objects to control the different functions in the app. This kept the global namespace clean and forced me to think about how all the pieces would fit together.
