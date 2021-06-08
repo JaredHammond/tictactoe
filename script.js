@@ -1,17 +1,20 @@
 
 // The big brain for the game
 let gameController = (function() {
-    'use strict';
     let board = [[],[],[]]; //[row][column]
     let turn = true; // If true, it is player 1's turn,
     let playerOne;  
     let playerTwo
+    let isComp = false;
     
     const startGame = () => {
         playerOne = new Player(document.getElementById('p1').value);
         playerTwo = new Player(document.getElementById('p2').value);
         playerOne.setOpponent(playerTwo.name);
         playerTwo.setOpponent(playerOne.name);
+        if (document.getElementById('computer').checked) {
+            gameController.isComp = true;
+        }
 
         for(let i=0; i<3; i++) {
             for(let j=0;j<3; j++) {
@@ -83,6 +86,7 @@ let gameController = (function() {
         }
     }
     return {
+        isComp,
         board,
         turn,
         play,
@@ -134,7 +138,20 @@ const displayController = (function() {
         playerTwoInput.setAttribute('type', 'text');
         playerTwoInput.setAttribute('id','p2');
         displayElements.push(playerTwoInput);
-
+        
+        const computerButton = document.createElement('input');
+        computerButton.setAttribute('type', 'checkbox');
+        computerButton.setAttribute('id', 'computer');
+        computerButton.classList.add('computer-button');
+        displayElements.push(computerButton);
+        
+        const computerLabel = document.createElement('label');
+        computerLabel.innerText = 'Play Computer';
+        computerLabel.setAttribute('for', 'computer');
+        computerLabel.classList.add('computer-button');
+        computerLabel.setAttribute('id','computer-label');
+        displayElements.push(computerLabel);
+        
         displayElements.forEach(element => playerArea.appendChild(element));
 
         let button = document.createElement('button');
@@ -143,6 +160,16 @@ const displayController = (function() {
             e.preventDefault()
             gameController.startGame();
         });
+
+        computerButton.addEventListener('change', function() {
+            if (this.checked) {
+                playerTwoInput.value = 'The Computer';
+                playerTwoInput.setAttribute('disabled', 'true');
+            } else {
+                playerTwoInput.value = '';
+                playerTwoInput.removeAttribute('disabled');
+            }
+        })
 
         playerArea.appendChild(button);
         content.appendChild(playerArea);
@@ -178,6 +205,11 @@ const displayController = (function() {
                 const col = parseInt(square.getAttribute('data-col'));
                 const marker = gameController.play(row, col);
                 if (marker != null) {square.classList.add(marker)};
+                
+                // If there's a computer and a player just played, computer goes
+                if (marker == 'x' && gameController.isComp) {
+                    ai.bestMove(gameController.board);
+                }
             });
             gameBoard.appendChild(square);
     
@@ -205,6 +237,12 @@ const displayController = (function() {
         content.appendChild(messages);
     }
 
+    const computerPlayDisplay = (row, col) => {
+        let computerSquare = document.querySelector(`[data-row="${row}"][data-col="${col}"]`)
+        let marker = gameController.play(row, col);
+        computerSquare.classList.add(marker);
+    }
+
     return{
         createPlayerInput,
         createGameboard,
@@ -212,6 +250,7 @@ const displayController = (function() {
         changeMessage,
         winCondition,
         drawCondition,
+        computerPlayDisplay,
     }
 })();
 
@@ -330,21 +369,20 @@ const ai = (function() {
                     board[i][j] = null;
     
                     if (currentMove > bestValue) {
+                        bestValue = currentMove;
                         bestRow = i;
                         bestCol = j;
                     }
                 }
             }
         }
-    //    gameController.play(bestRow, bestCol);  
-        console.log(bestRow, bestCol);
+        displayController.computerPlayDisplay(bestRow, bestCol);
     }
     
     // end AI stuff
 
     return {
         bestMove,
-        boardScore,
     }
 })()
 

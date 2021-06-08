@@ -15,13 +15,23 @@ body {
     display: grid;
     margin: 50px auto;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 2fr 1fr 1fr 1fr;
+    grid-template-rows: 2fr 1fr 1fr 0.5fr 1fr;
 }
 #player-area>button {
     grid-column: 1/3;
 }
+.computer-button {
+    grid-column: 2/3;
+    grid-row: 4/5;
+}
+#computer-label {
+    margin-top: 0;
+    position: relative;
+    left: 25px;
+    top: -3px;
+}
 .square {
-    background-color: pink;
+    background-color:rgb(206, 193, 218);
     position: relative;
     padding: 4px;
 }
@@ -44,7 +54,7 @@ body {
 .x::before {
     content: '';
     position: absolute;
-    background-color: black;
+    background-color: rgb(138, 51, 219);
     height: 15%;
     width: 100%;
     border-radius: 5px;
@@ -52,7 +62,7 @@ body {
 }
 .x::after {
     content: '';
-    background-color: black;
+    background-color: rgb(138, 51, 219);
     height: 15%;
     width: 100%;
     border-radius: 5px;
@@ -69,7 +79,7 @@ body {
 }
 .o::after {
     content: '';
-    border: black solid 19px;
+    border: rgb(138, 51, 219) solid 19px;
     padding-bottom: 55%;
     width: 55%;
     position: absolute;
