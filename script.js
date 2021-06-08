@@ -1,9 +1,3 @@
-/* 
-Notes for what to do next:
--Figure out how to implement player names into it.
--Maybe add mousedown to change color, and mouseup to add the marker
--What happens to event controllers at game end? Perhaps disable all marker event controllers?
-*/
 
 // The big brain for the game
 let gameController = (function() {
@@ -85,6 +79,7 @@ let gameController = (function() {
         }
     }
     return {
+        board,
         turn,
         play,
         checkDraw,
@@ -215,5 +210,129 @@ const displayController = (function() {
         drawCondition,
     }
 })();
+
+
+// AI Stuff
+const anyMovesLeft = (board) => {
+    for(let i = 0; i<3; i++) {
+        for(let j=0; i<3; j++) {
+            if (board[i][j] == null) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+const boardScore = function(board) {
+    // Returns true if the last play resulted in a win for that player
+    for (let i = 0; i < 3; i++) {
+        // Check rows
+        if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != null) {
+            if (board[i][0] == 'o') {
+                return 10;
+            } else {
+                return -10;
+            }
+        // Check columns
+        } else if (board[0][i] == board[1][i] && board[1][i] == board[2][i] && board[0][i] != null) {
+            if (board[0][i] == 'o') {
+                return 10;
+            } else {
+                return -10;
+            }
+        }
+    }
+    // Check one diagonal
+    if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != null) {
+        if (board[0][0] == 'o') {
+            return 10;
+        } else {
+            return -10;
+        }
+    // Check other diagonal
+    } else if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != null) {
+        if (board[0][2] == 'o') {
+            return 10;
+        } else {
+            return -10;
+        }
+    }
+    return 0;
+}
+
+const minimax = (board, isMaxPlayer) => {
+    let score = boardScore(board);
+
+    if (score == 10 || score == -10) {
+        return score;
+    }
+
+    if (anyMovesLeft(board) == false) {
+        return 0;
+    }
+
+    if (isMaxPlayer) {
+        let best = -1000;
+
+        for(let i=0; i<3; i++) {
+            for(let j=0; j<3; j++) {
+                if (board[i][j] == null) {
+                    board[i][j] == 'o';
+
+                    best = Math.min(best, minimax(board, false));
+                    console.log(best)
+
+                    board[i][j] = null;
+                }
+            }
+        }
+        return best;
+        
+    } else {
+        let best = 1000;
+
+        for(let i=0; i<3; i++) {
+            for(let j=0; j<3; j++) {
+                if (board[i][j] == null) {
+                    board[i][j] == 'x';
+
+                    best = Math.max(best, minimax(board, true));
+
+                    board[i][j] = null;
+                }
+            }
+        }
+        return best;
+    }
+}
+
+const bestMove = (board) => {
+    let bestValue = -100;
+    let bestRow = -1;
+    let bestCol = -1;
+
+    for(let i=0; i<3; i++) {
+        for(let j=0; j<3; j++) {
+
+            if (board[i][j] == null) {
+                board[i][j] = 'o';
+
+                let currentMove = minimax(board, false)
+
+                board[i][j] = null;
+
+                if (currentMove > bestValue) {
+                    bestRow = i;
+                    bestCol = j;
+                }
+            }
+        }
+    }
+//    gameController.play(bestRow, bestCol);  
+    console.log(bestRow, bestCol);
+}
+
+// end AI stuff
 
 displayController.createPlayerInput();
