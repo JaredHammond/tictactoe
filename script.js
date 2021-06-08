@@ -13,6 +13,11 @@ let gameController = (function() {
         playerOne.setOpponent(playerTwo.name);
         playerTwo.setOpponent(playerOne.name);
 
+        for(let i=0; i<3; i++) {
+            for(let j=0;j<3; j++) {
+                board[i][j] = null;
+            }
+        }
 
         displayController.removeCurrentContent();
         displayController.createGameboard();
@@ -32,7 +37,6 @@ let gameController = (function() {
     }
 
     const checkWin = function() {
-        console.log(board);
         // Returns true if the last play resulted in a win for that player
         for (let i = 0; i < 3; i++) {
             // Check rows
@@ -213,126 +217,136 @@ const displayController = (function() {
 
 
 // AI Stuff
-const anyMovesLeft = (board) => {
-    for(let i = 0; i<3; i++) {
-        for(let j=0; i<3; j++) {
-            if (board[i][j] == null) {
-                return true;
+
+const ai = (function() {
+    "use strict";
+
+    const anyMovesLeft = (board) => {
+        for(let i = 0; i<3; i++) {
+            for(let j=0; j<3; j++) {
+                if (board[i][j] == null) {
+                    return true;
+                }
             }
         }
+        return false;
     }
-    return false;
-}
-
-const boardScore = function(board) {
-    // Returns true if the last play resulted in a win for that player
-    for (let i = 0; i < 3; i++) {
-        // Check rows
-        if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != null) {
-            if (board[i][0] == 'o') {
+    
+    const boardScore = function(board) {
+        'use strict';
+        // Returns true if the last play resulted in a win for that player
+        for (let i = 0; i < 3; i++) {
+            // Check rows
+            if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != null) {
+                if (board[i][0] == 'o') {
+                    return 10;
+                } else {
+                    return -10;
+                }
+            // Check columns
+            } else if (board[0][i] == board[1][i] && board[1][i] == board[2][i] && board[0][i] != null) {
+                if (board[0][i] == 'o') {
+                    return 10;
+                } else {
+                    return -10;
+                }
+            }
+        }
+        // Check one diagonal
+        if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != null) {
+            if (board[0][0] == 'o') {
                 return 10;
             } else {
                 return -10;
             }
-        // Check columns
-        } else if (board[0][i] == board[1][i] && board[1][i] == board[2][i] && board[0][i] != null) {
-            if (board[0][i] == 'o') {
+        // Check other diagonal
+        } else if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != null) {
+            if (board[0][2] == 'o') {
                 return 10;
             } else {
                 return -10;
             }
         }
-    }
-    // Check one diagonal
-    if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != null) {
-        if (board[0][0] == 'o') {
-            return 10;
-        } else {
-            return -10;
-        }
-    // Check other diagonal
-    } else if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != null) {
-        if (board[0][2] == 'o') {
-            return 10;
-        } else {
-            return -10;
-        }
-    }
-    return 0;
-}
-
-const minimax = (board, isMaxPlayer) => {
-    let score = boardScore(board);
-
-    if (score == 10 || score == -10) {
-        return score;
-    }
-
-    if (anyMovesLeft(board) == false) {
         return 0;
     }
-
-    if (isMaxPlayer) {
-        let best = -1000;
-
-        for(let i=0; i<3; i++) {
-            for(let j=0; j<3; j++) {
-                if (board[i][j] == null) {
-                    board[i][j] == 'o';
-
-                    best = Math.min(best, minimax(board, false));
-                    console.log(best)
-
-                    board[i][j] = null;
-                }
-            }
+    
+    const minimax = (board, isMaxPlayer) => {
+        'use strict';
+        let score = boardScore(board);
+    
+        if (score == 10 || score == -10) {
+            return score;
         }
-        return best;
-        
-    } else {
-        let best = 1000;
-
-        for(let i=0; i<3; i++) {
-            for(let j=0; j<3; j++) {
-                if (board[i][j] == null) {
-                    board[i][j] == 'x';
-
-                    best = Math.max(best, minimax(board, true));
-
-                    board[i][j] = null;
-                }
-            }
+    
+        if (!anyMovesLeft(board)) {
+            return 0;
         }
-        return best;
-    }
-}
-
-const bestMove = (board) => {
-    let bestValue = -100;
-    let bestRow = -1;
-    let bestCol = -1;
-
-    for(let i=0; i<3; i++) {
-        for(let j=0; j<3; j++) {
-
-            if (board[i][j] == null) {
-                board[i][j] = 'o';
-
-                let currentMove = minimax(board, false)
-
-                board[i][j] = null;
-
-                if (currentMove > bestValue) {
-                    bestRow = i;
-                    bestCol = j;
+        if (isMaxPlayer) {
+            let best = -1000;
+            for(let i=0; i<3; i++) {
+                for(let j=0; j<3; j++) {
+                    if (board[i][j] == null) {
+                        board[i][j] = 'o';
+                        best = Math.max(best, minimax(board, false));
+    
+                        board[i][j] = null;
+                    }
                 }
             }
+            return best;
+            
+        } else {
+            let best = 1000;
+
+            for(let i=0; i<3; i++) {
+                for(let j=0; j<3; j++) {
+                    if (board[i][j] == null) {
+                        board[i][j] = 'x';
+                        best = Math.min(best, minimax(board, true));
+    
+                        board[i][j] = null;
+                    }
+                }
+            }
+            return best;
         }
     }
-//    gameController.play(bestRow, bestCol);  
-    console.log(bestRow, bestCol);
-}
+    
+    const bestMove = (board) => {
+        console.log(board);
+        'use strict';
+        let bestValue = -100;
+        let bestRow = -1;
+        let bestCol = -1;
+    
+        for(let i=0; i<3; i++) {
+            for(let j=0; j<3; j++) {
+    
+                if (board[i][j] == null) {
+                    board[i][j] = 'o';
+    
+                    let currentMove = minimax(board, false)
+    
+                    board[i][j] = null;
+    
+                    if (currentMove > bestValue) {
+                        bestRow = i;
+                        bestCol = j;
+                    }
+                }
+            }
+        }
+    //    gameController.play(bestRow, bestCol);  
+        console.log(bestRow, bestCol);
+    }
+    
+    // end AI stuff
 
-// end AI stuff
+    return {
+        bestMove,
+        boardScore,
+    }
+})()
+
 
 displayController.createPlayerInput();
